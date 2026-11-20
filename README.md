@@ -100,6 +100,10 @@ For troubleshooting without a window there is `airplay-probe.exe` in the program
 
 `target\release\airplay.exe --demo docs\demo\demo.h264` (run in the project folder) plays a self-made demo video through the real pipeline (decoder, renderer, UI) without a phone, handy for testing the picture path; see [docs/demo/README.md](docs/demo/README.md) and `scripts/make-demo.ps1`.
 
+## Contributing
+
+Issues and pull requests are welcome and are usually answered within 3 days – see [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Disclaimer
 
 This project is not affiliated with or endorsed by Apple. “AirPlay” is a trademark of Apple Inc. The FairPlay handshake code comes from UxPlay/RPiPlay (“playfair”). Copy-protected streams are shown black. Use it only with your own devices.

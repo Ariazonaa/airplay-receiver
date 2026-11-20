@@ -100,6 +100,10 @@ Zur Fehlersuche ohne Fenster gibt es `airplay-probe.exe` im Programmordner (kün
 
 `target\release\airplay.exe --demo docs\demo\demo.h264` (im Projektordner ausgeführt) spielt ein selbst erzeugtes Demo-Video ohne Handy durch die echte Pipeline (Dekoder, Darstellung, Oberfläche), praktisch zum Testen des Bildwegs; siehe [docs/demo/README.md](docs/demo/README.md) und `scripts/make-demo.ps1`.
 
+## Mitmachen
+
+Issues und Pull Requests sind erwünscht und werden in der Regel innerhalb von 3 Tagen bearbeitet – siehe [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Hinweis
 
 Dieses Projekt steht in keiner Verbindung zu Apple und wird von Apple nicht unterstützt oder empfohlen. „AirPlay“ ist eine Marke von Apple Inc. Der Code für den FairPlay-Handshake stammt aus UxPlay/RPiPlay („playfair“). Kopiergeschützte Streams werden schwarz angezeigt. Nur mit eigenen Geräten verwenden.
