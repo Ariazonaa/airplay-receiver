@@ -315,6 +315,10 @@ fn generate_uxplay_bindings(uxplay_lib: &Path, include_paths: &[PathBuf], out_di
 
 fn generate_ffmpeg_bindings(include_paths: &[PathBuf], out_dir: &Path) {
     base_builder("src/ffi/wrapper_ffmpeg.h", include_paths)
+        // Keine Doxygen-Kommentare übernehmen: Das eigene FFmpeg liegt nicht mehr in einem
+        // System-Include-Pfad, deshalb übernähme clang die Kommentare – deren eingerückte
+        // Codebeispiele würden zu (nicht kompilierbaren) Doc-Tests.
+        .generate_comments(false)
         .allowlist_function(FFMPEG_ALLOWLIST)
         .allowlist_type(FFMPEG_ALLOWLIST)
         .allowlist_var(FFMPEG_ALLOWLIST)
