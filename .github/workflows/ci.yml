@@ -29,6 +29,11 @@ jobs:
           update: true
           install: >-
             git
+            make
+            diffutils
+            curl
+            tar
+            xz
             mingw-w64-ucrt-x86_64-toolchain
             mingw-w64-ucrt-x86_64-rust
             mingw-w64-ucrt-x86_64-clang
@@ -37,6 +42,17 @@ jobs:
             mingw-w64-ucrt-x86_64-libplist
             mingw-w64-ucrt-x86_64-ffmpeg
             mingw-w64-ucrt-x86_64-sdl3
+            mingw-w64-ucrt-x86_64-nasm
+
+      - name: Cache FFmpeg 9.1
+        uses: actions/cache@v5
+        with:
+          path: build/ffmpeg-9.1
+          key: ${{ runner.os }}-ucrt64-ffmpeg-9.1-${{ hashFiles('scripts/build-ffmpeg.sh') }}
+
+      # Idempotent: returns immediately on a cache hit (BUILD-INFO matches).
+      - name: Build FFmpeg 9.1 (minimal, static)
+        run: scripts/build-ffmpeg.sh
 
       - name: Cache cargo and target
         uses: actions/cache@v5

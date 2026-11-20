@@ -27,8 +27,9 @@ A custom AirPlay receiver for Windows: iPhone and iPad mirror their screen and s
 
 ## Download & usage
 
-1. Download the latest ZIP `airplay-receiver-<tag>-windows-x64.zip` from the [Releases page](https://github.com/Ariazonaa/airplay-receiver/releases), extract it and start `airplay.exe`. (Or build it yourself, see [Building](#building).)
-2. On first start click **“Add firewall rule”** at the bottom of the window and confirm the Windows prompt. The rule only allows devices on your own network (local subnet) and only this `.exe` – if you move the program, add it once more.
+1. **Recommended – installer:** download `airplay-receiver-<tag>-setup.exe` from the [Releases page](https://github.com/Ariazonaa/airplay-receiver/releases) and run it. It installs to `C:\Program Files\AirPlay Receiver`, adds a Start menu entry (optional desktop icon) and creates the firewall rule (local subnet only, this `.exe` only), so step 2 is not needed. The setup is not code-signed, so Windows SmartScreen shows “Windows protected your PC”: click **More info** → **Run anyway**. Uninstall via Windows Settings → Apps; this also removes the firewall rule and keeps your settings in `%APPDATA%\airplay` and the logs in `%LOCALAPPDATA%\airplay`.
+   **Alternative – portable:** download `airplay-receiver-<tag>-windows-x64.zip`, extract it and start `airplay.exe`. (Or build it yourself, see [Building](#building).)
+2. Portable ZIP only: on first start click **“Add firewall rule”** at the bottom of the window and confirm the Windows prompt. The rule only allows devices on your own network (local subnet) and only this `.exe` – if you move the program, add it once more.
 3. On the iPhone/iPad: Control Center → **Screen Mirroring** → name of the PC.
 
 **Mullvad/VPN:** with Mullvad active, “Local network sharing” must be enabled, otherwise the iPhone cannot reach the PC.
@@ -71,7 +72,6 @@ The folders can be changed in the settings.
 - One device at a time; a newly connected device takes over.
 - Mac as a source, audio-only receiving (PC as speaker) and URL casting are not supported.
 - In portrait the iPhone only sends 498×1080 because it scales into the announced 1080p frame.
-- The program folder is ~169 MB (FFmpeg from MSYS2 with all formats).
 
 ## Latency
 
@@ -88,11 +88,17 @@ A glass-to-glass stopwatch comparison against LonelyScreen is still pending.
 
 1. Install MSYS2 (`winget install MSYS2.MSYS2`), then in the MSYS2 shell:
    `pacman -S --needed git mingw-w64-ucrt-x86_64-{toolchain,rust,clang,pkgconf,openssl,libplist,ffmpeg,sdl3}`
-2. From PowerShell in the project folder:
+   (the MSYS2 `ffmpeg` package is only used by the tests as a command-line tool; the program links its own FFmpeg build).
+2. Build FFmpeg once before the first build (FFmpeg 9.1 with only the components the program uses, static, into `build/ffmpeg-9.1`; takes a few minutes):
+   `pacman -S --needed make diffutils mingw-w64-ucrt-x86_64-nasm`, then from PowerShell in the project folder
+   `C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -c "scripts/build-ffmpeg.sh"`.
+   The script downloads the source tarball, checks its SHA256 and does nothing if the build is already there.
+3. From PowerShell in the project folder:
    - Build + clippy (`cargo build`): `C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -c "scripts/build.sh"`
    - Tests: `cargo test` in the UCRT64 shell (`AIRPLAY_CI=1 cargo test` on a machine without a hardware GPU or network, the affected tests then report a skip).
    - Optional: run the tests in a Windows Sandbox instead of on the host (no firewall prompts, no announcements on your network): `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\sandbox.ps1 test`. Needs Windows Sandbox with the `wsb` CLI (Windows 11 Pro/Enterprise).
    - Program folder `dist\airplay`: `C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -c "scripts/bundle.sh"`
+   - Installer `dist\airplay-receiver-<tag>-setup.exe` (needs [Inno Setup 6](https://jrsoftware.org/isinfo.php), e.g. `winget install JRSoftware.InnoSetup`, and `dist\airplay` from the previous step): `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build-installer.ps1 [-Version x.y.z] [-Tag <tag>]`
 
 For troubleshooting without a window there is `airplay-probe.exe` in the program folder (announces, accepts connections, shows packet counters).
 
@@ -110,4 +116,4 @@ This project is not affiliated with or endorsed by Apple. “AirPlay” is a tra
 
 ## License
 
-GPL-3.0, see [LICENSE](LICENSE). The AirPlay protocol core comes from [UxPlay](https://github.com/FDH2/UxPlay) v1.73.7 (GPL-3.0), see `third_party/uxplay/VENDORED.md`. egui is MIT/Apache-2.0 licensed; the fonts embedded by egui are under the Ubuntu Font Licence 1.0 (Ubuntu Light), MIT/Bitstream Vera License (Hack), MIT (egui icons from emoji-icon-font) and Noto Emoji (SIL OFL 1.1). The licenses of all Rust crates used are listed in [THIRD-PARTY-LICENSES.txt](THIRD-PARTY-LICENSES.txt). The license texts of egui and the fonts are in `third_party/licenses/`. `scripts/bundle.sh` copies them into the `licenses` folder of the program directory, together with `THIRD-PARTY-LICENSES.txt`, the GPL-3.0 of airplay and UxPlay, and the license texts of the bundled MSYS2 DLLs (`licenses/dll/`, mapping in `licenses/dll/PACKAGES.txt`).
+GPL-3.0, see [LICENSE](LICENSE). FFmpeg 9.1 (LGPL-2.1-or-later, built without GPL parts and without external codec libraries) is linked statically (built by `scripts/build-ffmpeg.sh`). The Corresponding Source of the bundled FFmpeg is available at https://ffmpeg.org/releases/ffmpeg-9.1.tar.xz (unmodified release tarball, SHA256 `1a4d394ae63d190a526cd052eb4415c156b5c5e2df37efab41a7de0b8fde2433`); this URL, the SHA256 and the full configure line are also in `licenses/FFmpeg-BUILD-INFO.txt` of the program folder, the license text in `licenses/FFmpeg-LGPL-2.1.txt`, FFmpeg's notes on files with their own terms in `licenses/FFmpeg-LICENSE.md`, and the copyright and permission notices of the compiled FFmpeg files under other permissive licenses (libjpeg/IJG, MIT, BSD, ISC) in `licenses/FFmpeg-NOTICES.txt`. This software is based in part on the work of the Independent JPEG Group. The AirPlay protocol core comes from [UxPlay](https://github.com/FDH2/UxPlay) v1.73.7 (GPL-3.0), see `third_party/uxplay/VENDORED.md`. egui is MIT/Apache-2.0 licensed; the fonts embedded by egui are under the Ubuntu Font Licence 1.0 (Ubuntu Light), MIT/Bitstream Vera License (Hack), MIT (egui icons from emoji-icon-font) and Noto Emoji (SIL OFL 1.1). The licenses of all Rust crates used are listed in [THIRD-PARTY-LICENSES.txt](THIRD-PARTY-LICENSES.txt). The license texts of egui and the fonts are in `third_party/licenses/`. `scripts/bundle.sh` copies them into the `licenses` folder of the program directory, together with `THIRD-PARTY-LICENSES.txt`, the GPL-3.0 of airplay and UxPlay, the FFmpeg files mentioned above, and the license texts of the bundled MSYS2 DLLs (`licenses/dll/`, mapping in `licenses/dll/PACKAGES.txt`).

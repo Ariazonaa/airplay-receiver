@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Baut Release und legt ein lauffähiges Programmverzeichnis an (Standard dist/airplay):
 # airplay.exe + airplay-probe.exe + benötigte DLLs aus MSYS2 UCRT64 + Lizenzen.
+# FFmpeg ist statisch gelinkt; vorher einmal scripts/build-ffmpeg.sh ausführen.
 # Aus PowerShell: C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -c "scripts/bundle.sh"
 # Anderes Ziel: DIST=dist/xyz scripts/bundle.sh
 set -euo pipefail
@@ -30,6 +31,13 @@ cp third_party/uxplay/LICENSE "$OUT/licenses/UxPlay-GPL-3.0.txt"
 # egui (MIT/Apache-2.0) und die von egui eingebetteten Schriften (Ubuntu Font Licence, Hack, egui-icons)
 cp third_party/licenses/*.txt "$OUT/licenses/"
 cp THIRD-PARTY-LICENSES.txt "$OUT/licenses/"
+# FFmpeg ist statisch gelinkt (eigener Build, scripts/build-ffmpeg.sh): LGPL-Text, FFmpegs
+# LICENSE.md (Dateien mit eigenen Bedingungen, u. a. IJG) und Quelle/Configure-Zeile des
+# Builds samt IJG-Hinweis.
+FFMPEG_PREFIX="$(cygpath -u "${AIRPLAY_FFMPEG_PREFIX:-build/ffmpeg-9.1}")"
+cp "$FFMPEG_PREFIX/share/ffmpeg-build/COPYING.LGPLv2.1" "$OUT/licenses/FFmpeg-LGPL-2.1.txt"
+cp "$FFMPEG_PREFIX/share/ffmpeg-build/LICENSE.md" "$OUT/licenses/FFmpeg-LICENSE.md"
+cp "$FFMPEG_PREFIX/share/ffmpeg-build/BUILD-INFO.txt" "$OUT/licenses/FFmpeg-BUILD-INFO.txt"
 # Lizenzen der gebündelten MSYS2-DLLs: je DLL das besitzende Paket, dessen Lizenzordner
 # nach licenses/dll/<paket>/ und die Zuordnung DLL -> Paket in PACKAGES.txt.
 # Standardtexte (third_party/licenses/common) passend zur pacman-Lizenzangabe. Eine

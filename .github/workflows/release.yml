@@ -4,7 +4,7 @@ on:
   push:
     tags:
       - "v*"
-  # Manual test run: builds the ZIP and attaches it to the run only (no release).
+  # Manual test run: builds ZIP and setup and attaches them to the run only (no release).
   workflow_dispatch:
 
 permissions:
@@ -26,6 +26,11 @@ jobs:
           update: true
           install: >-
             git
+            make
+            diffutils
+            curl
+            tar
+            xz
             mingw-w64-ucrt-x86_64-toolchain
             mingw-w64-ucrt-x86_64-rust
             mingw-w64-ucrt-x86_64-clang
@@ -34,6 +39,17 @@ jobs:
             mingw-w64-ucrt-x86_64-libplist
             mingw-w64-ucrt-x86_64-ffmpeg
             mingw-w64-ucrt-x86_64-sdl3
+            mingw-w64-ucrt-x86_64-nasm
+
+      - name: Cache FFmpeg 9.1
+        uses: actions/cache@v5
+        with:
+          path: build/ffmpeg-9.1
+          key: ${{ runner.os }}-ucrt64-ffmpeg-9.1-${{ hashFiles('scripts/build-ffmpeg.sh') }}
+
+      # Idempotent: returns immediately on a cache hit (BUILD-INFO matches).
+      - name: Build FFmpeg 9.1 (minimal, static)
+        run: scripts/build-ffmpeg.sh
 
       - name: Cache cargo and target
         uses: actions/cache@v5
@@ -62,13 +78,31 @@ jobs:
           "SHA256 $((Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant())  $zip"
           "ZIP=$zip" >> $env:GITHUB_ENV
 
-      - name: Upload ZIP as run artifact (manual run)
+      # Pinned (newest 6.x on Chocolatey): a new major version could move ISCC/German.isl.
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --version 6.7.1 -y --no-progress
+
+      # Version comes from Cargo.toml, file name from the tag; needs dist\airplay from Bundle.
+      - name: Build installer
+        shell: pwsh
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          scripts/build-installer.ps1 -Tag $env:TAG
+          $setup = "dist/airplay-receiver-$env:TAG-setup.exe"
+          if (-not (Test-Path $setup)) { throw "Setup missing: $setup" }
+          "SETUP=$setup" >> $env:GITHUB_ENV
+
+      - name: Upload ZIP and setup as run artifact (manual run)
         if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ env.ZIP }}
+          name: airplay-receiver-${{ github.ref_name }}
           if-no-files-found: error
-          path: ${{ env.ZIP }}
+          path: |
+            ${{ env.ZIP }}
+            ${{ env.SETUP }}
 
       - name: Draft GitHub release
         if: startsWith(github.ref, 'refs/tags/v')
@@ -77,4 +111,6 @@ jobs:
           draft: true
           generate_release_notes: true
           fail_on_unmatched_files: true
-          files: ${{ env.ZIP }}
+          files: |
+            ${{ env.ZIP }}
+            ${{ env.SETUP }}

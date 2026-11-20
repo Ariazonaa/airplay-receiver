@@ -6,6 +6,9 @@ use std::ffi::{CStr, CString};
 use crate::app::log::LogLevel;
 use crate::ffi::sdl3::error::SDL_GetError;
 use crate::ffi::sdl3::events::{SDL_Event, SDL_PollEvent};
+use crate::ffi::sdl3::hints::{
+    SDL_HINT_WINDOWS_INTRESOURCE_ICON, SDL_HINT_WINDOWS_INTRESOURCE_ICON_SMALL, SDL_SetHint,
+};
 use crate::ffi::sdl3::init::{SDL_INIT_AUDIO, SDL_INIT_VIDEO, SDL_Init, SDL_Quit};
 use crate::ffi::sdl3::timer::SDL_GetTicks;
 use crate::ffi::sdl3::video::{
@@ -52,6 +55,9 @@ impl Window {
     pub fn create(title: &str) -> Result<Window, String> {
         // SAFETY: SDL-Aufrufe auf dem Haupt-Thread nach SDL_SetMainReady (main.rs).
         unsafe {
+            // Fenster- und Taskleisten-Icon aus der eingebetteten Ressource 1 (build.rs).
+            SDL_SetHint(SDL_HINT_WINDOWS_INTRESOURCE_ICON, c"1".as_ptr());
+            SDL_SetHint(SDL_HINT_WINDOWS_INTRESOURCE_ICON_SMALL, c"1".as_ptr());
             if !SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) {
                 let msg = format!("SDL_Init: {}", sdl_error());
                 log_msg!(LogLevel::Error, "{}", msg);
