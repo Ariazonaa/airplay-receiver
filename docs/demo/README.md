@@ -1,6 +1,6 @@
 # Demo video
 
-`demo.h264` is the input for the demo mode, which is used for the screenshots in `docs/images/`:
+`demo.h264` is the input for the demo mode, which shows a picture without a phone (useful for testing the decoder and renderer):
 
 ```
 target\release\airplay.exe --demo docs\demo\demo.h264

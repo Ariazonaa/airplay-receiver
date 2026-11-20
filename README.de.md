@@ -6,7 +6,12 @@ Eigener AirPlay-Empfänger für Windows: iPhone und iPad spiegeln Bildschirm und
 [![Lizenz: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
 ![Plattform: Windows 10/11](https://img.shields.io/badge/platform-Windows%2010%2F11-0078d4.svg)
 
-![Bildschirmspiegelung im Fenster des AirPlay-Empfängers](docs/images/de-mirroring.png)
+<p align="center">
+  <img src="docs/images/mirroring-browser.png" alt="Ein iPhone spiegelt einen Webbrowser in das Fenster des AirPlay-Empfängers" width="260">
+  <img src="docs/images/mirroring-nas.png" alt="Ein iPhone spiegelt eine NAS-App in das Fenster des AirPlay-Empfängers" width="260">
+  <img src="docs/images/mirroring-control-center.png" alt="Ein iPhone spiegelt sein Kontrollzentrum in das Fenster des AirPlay-Empfängers" width="260">
+</p>
+<p align="center"><sub>Echtes iPhone, gespiegelt ins Empfängerfenster (Fenster auf Handyformat gezogen, ohne Ränder).</sub></p>
 
 *English version: [README.md](README.md)*
 
@@ -28,7 +33,7 @@ Eigener AirPlay-Empfänger für Windows: iPhone und iPad spiegeln Bildschirm und
 
 **Mullvad/VPN:** Mit aktivem Mullvad muss „Lokales Netzwerk teilen“ eingeschaltet sein, sonst erreicht das iPhone den PC nicht.
 
-![Der Wartebildschirm mit dem Netzwerk-/Firewall-Hinweis, wie er beim ersten Start erscheint](docs/images/de-idle.png)
+![Der Wartebildschirm mit Empfängername und Adresse des PCs](docs/images/de-idle.png)
 
 ### Tasten
 
@@ -49,9 +54,7 @@ Umschalten über **Einstellungen** (Knopf oben rechts, erscheint bei Mausbewegun
 
 ![Die Einstellungen](docs/images/de-settings.png)
 
-Während einer Aufnahme erscheint eine rote Anzeige:
-
-![Aufnahme läuft](docs/images/de-recording.png)
+Während einer Aufnahme erscheint oben links eine rote **REC**-Anzeige mit der Laufzeit.
 
 ### Speicherorte
 
@@ -95,7 +98,7 @@ Zur Fehlersuche ohne Fenster gibt es `airplay-probe.exe` im Programmordner (kün
 
 ### Entwicklung
 
-`target\release\airplay.exe --demo docs\demo\demo.h264` (im Projektordner ausgeführt) spielt ein selbst erzeugtes Demo-Video ohne Handy durch die echte Pipeline (Dekoder, Darstellung, Oberfläche). Damit entstehen die README-Screenshots, siehe [docs/demo/README.md](docs/demo/README.md) und `scripts/make-demo.ps1`.
+`target\release\airplay.exe --demo docs\demo\demo.h264` (im Projektordner ausgeführt) spielt ein selbst erzeugtes Demo-Video ohne Handy durch die echte Pipeline (Dekoder, Darstellung, Oberfläche), praktisch zum Testen des Bildwegs; siehe [docs/demo/README.md](docs/demo/README.md) und `scripts/make-demo.ps1`.
 
 ## Hinweis
 

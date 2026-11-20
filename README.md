@@ -6,7 +6,12 @@ A custom AirPlay receiver for Windows: iPhone and iPad mirror their screen and s
 [![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
 ![Platform: Windows 10/11](https://img.shields.io/badge/platform-Windows%2010%2F11-0078d4.svg)
 
-![Screen mirroring in the AirPlay Receiver window](docs/images/en-mirroring.png)
+<p align="center">
+  <img src="docs/images/mirroring-browser.png" alt="An iPhone mirroring a web browser into the AirPlay Receiver window" width="260">
+  <img src="docs/images/mirroring-nas.png" alt="An iPhone mirroring a NAS app into the AirPlay Receiver window" width="260">
+  <img src="docs/images/mirroring-control-center.png" alt="An iPhone mirroring its Control Center into the AirPlay Receiver window" width="260">
+</p>
+<p align="center"><sub>Real iPhone, mirrored into the receiver window (window sized to the phone, no borders).</sub></p>
 
 *Deutsche Fassung: [README.de.md](README.de.md)*
 
@@ -28,7 +33,7 @@ A custom AirPlay receiver for Windows: iPhone and iPad mirror their screen and s
 
 **Mullvad/VPN:** with Mullvad active, “Local network sharing” must be enabled, otherwise the iPhone cannot reach the PC.
 
-![The waiting screen with the network/firewall notice, as shown on first start](docs/images/en-idle.png)
+![The waiting screen with the receiver name and the PC's address](docs/images/en-idle.png)
 
 ### Keys
 
@@ -49,9 +54,7 @@ Switch in **Settings** (button at the top right, appears when the mouse moves). 
 
 ![The settings](docs/images/en-settings.png)
 
-While recording, a red indicator is shown:
-
-![Recording in progress](docs/images/en-recording.png)
+While recording, a red **REC** indicator with the elapsed time is shown at the top left.
 
 ### Where files go
 
@@ -95,7 +98,7 @@ For troubleshooting without a window there is `airplay-probe.exe` in the program
 
 ### Development
 
-`target\release\airplay.exe --demo docs\demo\demo.h264` (run in the project folder) plays a self-made demo video through the real pipeline (decoder, renderer, UI) without a phone. It is used to produce the README screenshots, see [docs/demo/README.md](docs/demo/README.md) and `scripts/make-demo.ps1`.
+`target\release\airplay.exe --demo docs\demo\demo.h264` (run in the project folder) plays a self-made demo video through the real pipeline (decoder, renderer, UI) without a phone, handy for testing the picture path; see [docs/demo/README.md](docs/demo/README.md) and `scripts/make-demo.ps1`.
 
 ## Disclaimer
 
