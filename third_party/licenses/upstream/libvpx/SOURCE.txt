@@ -1,0 +1,3 @@
+License and patent grant of libvpx 1.17.0 (MSYS2 package mingw-w64-ucrt-x86_64-libvpx 1.17.0-1; its package ships no license file).
+Sources: https://chromium.googlesource.com/webm/libvpx/+/refs/tags/v1.17.0/LICENSE and .../PATENTS (tag v1.17.0), unmodified.
+License: BSD-3-Clause

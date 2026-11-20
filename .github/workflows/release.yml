@@ -1,0 +1,72 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Bundle and draft release
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            git
+            mingw-w64-ucrt-x86_64-toolchain
+            mingw-w64-ucrt-x86_64-rust
+            mingw-w64-ucrt-x86_64-clang
+            mingw-w64-ucrt-x86_64-pkgconf
+            mingw-w64-ucrt-x86_64-openssl
+            mingw-w64-ucrt-x86_64-libplist
+            mingw-w64-ucrt-x86_64-ffmpeg
+            mingw-w64-ucrt-x86_64-sdl3
+
+      - name: Cache cargo and target
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo
+            target
+          key: ${{ runner.os }}-ucrt64-release-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-ucrt64-release-
+
+      # Same build as in bundle.sh, but with --locked; bundle.sh then reuses it.
+      - name: Build release
+        run: cargo build --release --bins --locked
+
+      - name: Bundle
+        run: scripts/bundle.sh
+
+      - name: ZIP and SHA256
+        shell: pwsh
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          $zip = "airplay-receiver-$env:TAG-windows-x64.zip"
+          Compress-Archive -Path dist/airplay -DestinationPath $zip
+          $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          [IO.File]::WriteAllText((Join-Path $PWD "$zip.sha256"), "$hash  $zip`n")
+          Get-Content "$zip.sha256"
+          "ZIP=$zip" >> $env:GITHUB_ENV
+
+      - name: Draft GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          fail_on_unmatched_files: true
+          files: |
+            ${{ env.ZIP }}
+            ${{ env.ZIP }}.sha256

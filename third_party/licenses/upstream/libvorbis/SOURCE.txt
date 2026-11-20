@@ -1,0 +1,3 @@
+License text of libvorbis 1.3.7 (MSYS2 package mingw-w64-ucrt-x86_64-libvorbis 1.3.7-3; its package ships no license file).
+Source: https://raw.githubusercontent.com/xiph/vorbis/v1.3.7/COPYING (tag v1.3.7), unmodified.
+License: BSD-3-Clause

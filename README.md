@@ -1,0 +1,106 @@
+# AirPlay Receiver
+
+A custom AirPlay receiver for Windows: iPhone and iPad mirror their screen and sound to the PC – with as little latency as possible.
+
+[![CI](https://github.com/Ariazonaa/airplay-receiver/actions/workflows/ci.yml/badge.svg)](https://github.com/Ariazonaa/airplay-receiver/actions/workflows/ci.yml)
+[![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
+![Platform: Windows 10/11](https://img.shields.io/badge/platform-Windows%2010%2F11-0078d4.svg)
+
+![Screen mirroring in the AirPlay Receiver window](docs/images/en-mirroring.png)
+
+*Deutsche Fassung: [README.de.md](README.de.md)*
+
+## Features
+
+- Video decoded on the GPU (D3D11VA) and shown directly
+- Audio (AAC-ELD) on its own thread, keeps playing while the window is moved
+- Two modes: **Low latency** and **Smooth**
+- Screenshot (PNG) and recording (MP4 with sound)
+- Optional statistics overlay (**Show statistics** in the settings)
+- No Apple Bonjour/iTunes needed – announced via the DNS-SD service built into Windows
+- User interface in German or English (follows the Windows display language, can be changed in the settings)
+
+## Download & usage
+
+1. Download the latest ZIP `airplay-receiver-<tag>-windows-x64.zip` from the [Releases page](https://github.com/Ariazonaa/airplay-receiver/releases), extract it and start `airplay.exe`. (Or build it yourself, see [Building](#building).)
+2. On first start click **“Add firewall rule”** at the bottom of the window and confirm the Windows prompt. The rule only allows devices on your own network (local subnet) and only this `.exe` – if you move the program, add it once more.
+3. On the iPhone/iPad: Control Center → **Screen Mirroring** → name of the PC.
+
+**Mullvad/VPN:** with Mullvad active, “Local network sharing” must be enabled, otherwise the iPhone cannot reach the PC.
+
+![The waiting screen with the network/firewall notice, as shown on first start](docs/images/en-idle.png)
+
+### Keys
+
+| Key | Action |
+|---|---|
+| F11 | Toggle fullscreen |
+| Esc | Leave fullscreen |
+| Ctrl+T | Toggle always on top |
+| F9 | Screenshot |
+| F10 | Start/stop recording |
+
+### Modes
+
+- **Low latency** (default): every frame is shown immediately; audio keeps a ~60 ms buffer and is adjusted gently (±2 % speed). For games and interaction.
+- **Smooth**: picture and sound play in sync by timestamp. The configured delay (100–500 ms, default 200 ms) counts from arrival at the PC; the lead that iOS plans in by itself (measured ~180 ms audio, ~100 ms video) is taken into account automatically. For videos.
+
+Switch in **Settings** (button at the top right, appears when the mouse moves). The language is set there too: *Automatic (Windows)*, *Deutsch* or *English*.
+
+![The settings](docs/images/en-settings.png)
+
+While recording, a red indicator is shown:
+
+![Recording in progress](docs/images/en-recording.png)
+
+### Where files go
+
+- Screenshots: `Pictures\AirPlay\AirPlay_YYYY-MM-DD_hh-mm-ss.png`
+- Recordings: `Videos\AirPlay\AirPlay_YYYY-MM-DD_hh-mm-ss.mp4`, after rotating the device `…_teil2.mp4` etc.
+- Settings: `%APPDATA%\airplay\config.json`
+- Log (incl. diagnostic lines every 2 s, in German): `%LOCALAPPDATA%\airplay\logs\airplay.log`
+
+The folders can be changed in the settings.
+
+### Known limits
+
+- Netflix, Disney+, Apple TV+ and similar usually show only black because of copy protection.
+- One device at a time; a newly connected device takes over.
+- Mac as a source, audio-only receiving (PC as speaker) and URL casting are not supported.
+- In portrait the iPhone only sends 498×1080 because it scales into the announced 1080p frame.
+- The program folder is ~169 MB (FFmpeg from MSYS2 with all formats).
+
+## Latency
+
+Measured from the log (iPhone19,7, Ethernet, 2026-11-20):
+
+| Mode | Audio buffer | Picture |
+|---|---|---|
+| Low latency | 53–81 ms | immediately on arrival |
+| Smooth (200 ms) | 187–205 ms | in sync with audio |
+
+A glass-to-glass stopwatch comparison against LonelyScreen is still pending.
+
+## Building
+
+1. Install MSYS2 (`winget install MSYS2.MSYS2`), then in the MSYS2 shell:
+   `pacman -S --needed git mingw-w64-ucrt-x86_64-{toolchain,rust,clang,pkgconf,openssl,libplist,ffmpeg,sdl3}`
+2. From PowerShell in the project folder:
+   - Build + clippy (`cargo build`): `C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -c "scripts/build.sh"`
+   - Tests: `cargo test` in the UCRT64 shell (`AIRPLAY_CI=1 cargo test` on a machine without a hardware GPU or network, the affected tests then report a skip).
+   - Optional: run the tests in a Windows Sandbox instead of on the host (no firewall prompts, no announcements on your network): `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\sandbox.ps1 test`. Needs Windows Sandbox with the `wsb` CLI (Windows 11 Pro/Enterprise).
+   - Program folder `dist\airplay`: `C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -c "scripts/bundle.sh"`
+
+For troubleshooting without a window there is `airplay-probe.exe` in the program folder (announces, accepts connections, shows packet counters).
+
+### Development
+
+`target\release\airplay.exe --demo docs\demo\demo.h264` (run in the project folder) plays a self-made demo video through the real pipeline (decoder, renderer, UI) without a phone. It is used to produce the README screenshots, see [docs/demo/README.md](docs/demo/README.md) and `scripts/make-demo.ps1`.
+
+## Disclaimer
+
+This project is not affiliated with or endorsed by Apple. “AirPlay” is a trademark of Apple Inc. The FairPlay handshake code comes from UxPlay/RPiPlay (“playfair”). Copy-protected streams are shown black. Use it only with your own devices.
+
+## License
+
+GPL-3.0, see [LICENSE](LICENSE). The AirPlay protocol core comes from [UxPlay](https://github.com/FDH2/UxPlay) v1.73.7 (GPL-3.0), see `third_party/uxplay/VENDORED.md`. egui is MIT/Apache-2.0 licensed; the fonts embedded by egui are under the Ubuntu Font Licence 1.0 (Ubuntu Light), MIT/Bitstream Vera License (Hack), MIT (egui icons from emoji-icon-font) and Noto Emoji (SIL OFL 1.1). The licenses of all Rust crates used are listed in [THIRD-PARTY-LICENSES.txt](THIRD-PARTY-LICENSES.txt). The license texts of egui and the fonts are in `third_party/licenses/`. `scripts/bundle.sh` copies them into the `licenses` folder of the program directory, together with `THIRD-PARTY-LICENSES.txt`, the GPL-3.0 of airplay and UxPlay, and the license texts of the bundled MSYS2 DLLs (`licenses/dll/`, mapping in `licenses/dll/PACKAGES.txt`).

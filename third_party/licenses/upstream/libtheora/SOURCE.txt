@@ -1,0 +1,3 @@
+License text of libtheora 1.2.0 (MSYS2 package mingw-w64-ucrt-x86_64-libtheora 1.2.0-2; its package ships no license file).
+Source: https://gitlab.xiph.org/xiph/theora/-/raw/v1.2.0/COPYING (tag v1.2.0), unmodified.
+License: BSD-3-Clause
